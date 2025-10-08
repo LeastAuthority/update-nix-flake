@@ -1,6 +1,10 @@
 name: 'Update Nix Flake'
 description: 'Create a pull-request to update the nix flake'
 inputs:
+  dir:
+    description: 'Directory path to the flake, relative to the directory root'
+    required: false
+    default: ""
   nix_config:
     description: 'Configuration options to pass to Nix env.'
     required: false
@@ -17,22 +21,27 @@ runs:
   steps:
     - name: Prepare
       id: prepare
+      working-directory: "${{ inputs.dir }}"
       run: |
         echo NIX_CONFIG="${{ inputs.nix_config }}" >> $GITHUB_ENV
         echo NIX_PATH="${{ inputs.nix_path }}" >> $GITHUB_ENV
+        nix build ".#devShells.x86_64-linux.default" -o "${{ runner.temp }}/flake_original"
       shell: bash
 
     - name: Update
       id: update
+      working-directory: "${{ inputs.dir }}"
       run: |
         nix flake update 2>&1 \
         | tee /dev/stderr \
         | grep -A 2 "Updated input" \
-        > ./nix-flake-update.stdout
+        > ${{ runner.temp }}/nix-flake-update.stdout
+        nix build ".#devShells.x86_64-linux.default" -o "${{ runner.temp }}/flake_updated"
       shell: bash
 
     - name: Check
       id: check
+      working-directory: "${{ inputs.dir }}"
       run: |
         nix flake show
         nix flake check
@@ -41,22 +50,22 @@ runs:
     - name: Diff
       id: diff
       run: |
-        nix store diff-closures .?ref=origin/main#devShells.x86_64-linux.default .?ref=HEAD#devShells.x86_64-linux.default \
+        nix store diff-closures "${{ runner.temp }}/flake_original" "${{ runner.temp }}/flake_updated" \
         | tee /dev/stderr \
-        > ./nix-shell-diff.stdout
+        > ${{ runner.temp }}/nix-shell-diff.stdout
       shell: bash
 
     - name: Prepare pull-request
       id: prepare-pr
       run: |
-        cat <<EOT | tee ./pull-request-body.md >> $GITHUB_STEP_SUMMARY
+        cat <<EOT | tee ${{ runner.temp }}/pull-request-body.md >> $GITHUB_STEP_SUMMARY
         ### Nix Flake Update
         \`\`\`
-        `cat ./nix-flake-update.stdout`
+        `cat ${{ runner.temp }}/nix-flake-update.stdout`
         \`\`\`
         ### Nix Shell Diff
         \`\`\`
-        `cat ./nix-shell-diff.stdout`
+        `cat ${{ runner.temp }}/nix-shell-diff.stdout`
         \`\`\`
         EOT
       shell: bash
@@ -68,11 +77,11 @@ runs:
       uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
       with:
         add-paths: |
-          flake.lock
+          ${{ inputs.dir }}/flake.lock
         base: "main"
         branch: "update-nix-flake"
         commit-message: "Update Nix Flake"
         delete-branch: true
         title: "Update Nix Flake"
         token: ${{ inputs.token }}
-        body-path: "./pull-request-body.md"
+        body-path: "${{ runner.temp }}/pull-request-body.md"

@@ -1,0 +1,43 @@
+name: Integration
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - './action.yml'
+      - '.github/workflows/integration.yml'
+      - './test/**'
+  pull_request:
+    paths:
+      - './action.yml'
+      - '.github/workflows/integration.yml'
+      - './test/**'
+
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install Nix
+        id: install_nix
+        uses: nixbuild/nix-quick-install-action@2c9db80fb984ceb1bcaa77cdda3fdf8cfba92035 # v34
+
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        with:
+          fetch-depth: 0 # All commits required to diff changes
+
+      - name: Update Nix Flake
+        id: update_nix_flake
+        uses: ./
+        with:
+          token: ${{ secrets.GH_PAT_UPDATE }}
+          dir: tests/fixtures/basic-flake
+
+      - name: Check Nix Flake
+        id: check_flake
+        working-directory: ./tests/fixtures/basic-flake
+        run: |
+          nix flake check
