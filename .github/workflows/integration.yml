@@ -5,14 +5,14 @@ on:
     branches:
       - main
     paths:
-      - './action.yml'
+      - 'action.yml'
       - '.github/workflows/integration.yml'
-      - './test/**'
+      - 'tests/**'
   pull_request:
     paths:
-      - './action.yml'
+      - 'action.yml'
       - '.github/workflows/integration.yml'
-      - './test/**'
+      - 'tests/**'
 
 jobs:
   check:
