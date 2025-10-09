@@ -8,7 +8,7 @@ inputs:
   dir:
     description: 'Directory path to the flake, relative to the directory root'
     required: false
-    default: ""
+    default: "."
   nix_config:
     description: 'Configuration options to pass to Nix env.'
     required: false
