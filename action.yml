@@ -73,7 +73,7 @@ runs:
     - name: Create pull-request
       id: create-pr
       # The pull-request should only be created on scheduled or dispatched workflows
-      if: ${{ github.event_name != 'pull_request' }}
+      if: ${{ contains(fromJSON('["workflow_dispatch", "schedule"]'), github.event_name) }}
       uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
       with:
         add-paths: |
