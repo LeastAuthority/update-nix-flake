@@ -1,6 +1,10 @@
 name: 'Update Nix Flake'
 description: 'Create a pull-request to update the nix flake'
 inputs:
+  branch:
+    description: 'Name of the branch to create for the pull-request'
+    required: false
+    default: 'update-nix-flake'
   dir:
     description: 'Directory path to the flake, relative to the directory root'
     required: false
@@ -79,7 +83,7 @@ runs:
         add-paths: |
           ${{ inputs.dir }}/flake.lock
         base: "main"
-        branch: "update-nix-flake"
+        branch: "${{ inputs.branch }}"
         commit-message: "Update Nix Flake"
         delete-branch: true
         title: "Update Nix Flake"
