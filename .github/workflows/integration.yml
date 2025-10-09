@@ -33,7 +33,7 @@ jobs:
         id: update_nix_flake
         uses: ./
         with:
-          token: ${{ secrets.GH_PAT_UPDATE }}
+          token: ${{ github.token }}
           dir: tests/fixtures/basic-flake
 
       - name: Check Nix Flake
