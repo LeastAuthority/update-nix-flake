@@ -52,6 +52,7 @@ runs:
       run: |
         nix store diff-closures "${{ runner.temp }}/flake_original" "${{ runner.temp }}/flake_updated" \
         | tee /dev/stderr \
+        | sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,2};?)?)?[mGK]//g" \
         > ${{ runner.temp }}/nix-shell-diff.stdout
       shell: bash
 
