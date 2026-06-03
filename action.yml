@@ -40,7 +40,7 @@ runs:
         | tee /dev/stderr \
         | { grep -A 2 "Updated input" || echo -n "No changes"; } \
         > ${{ runner.temp }}/nix-flake-update.stdout
-        nix build ".#devShells.x86_64-linux.default" -o "${{ runner.temp }}/flake_updated"
+        nix build -o "${{ runner.temp }}/flake_updated"
       shell: bash
 
     - name: Check
