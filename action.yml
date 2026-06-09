@@ -17,6 +17,10 @@ inputs:
     description:
     required: false
     default: 'nixpkgs=flake:nixpkgs'
+  nix_target:
+    description: 'Specific output to be verify when updating the flake'
+    required: false
+    default: '.#devShells.x86_64-linux.default'
   token:
     description: 'Personal Access Token with write permissions on content of the repository'
     required: true
@@ -29,7 +33,7 @@ runs:
       run: |
         echo NIX_CONFIG="${{ inputs.nix_config }}" >> $GITHUB_ENV
         echo NIX_PATH="${{ inputs.nix_path }}" >> $GITHUB_ENV
-        nix build ".#devShells.x86_64-linux.default" -o "${{ runner.temp }}/flake_original"
+        nix build "${{ inputs.nix_target }}" -o "${{ runner.temp }}/flake_original"
       shell: bash
 
     - name: Update
@@ -40,7 +44,7 @@ runs:
         | tee /dev/stderr \
         | { grep -A 2 "Updated input" || echo -n "No changes"; } \
         > ${{ runner.temp }}/nix-flake-update.stdout
-        nix build ".#devShells.x86_64-linux.default" -o "${{ runner.temp }}/flake_updated"
+        nix build "${{ inputs.nix_target }}" -o "${{ runner.temp }}/flake_updated"
       shell: bash
 
     - name: Check
