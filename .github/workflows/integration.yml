@@ -6,11 +6,13 @@ on:
       - main
     paths:
       - 'action.yml'
+      - '.github/workflows/dependabot.yml'
       - '.github/workflows/integration.yml'
       - 'tests/**'
   pull_request:
     paths:
       - 'action.yml'
+      - '.github/workflows/dependabot.yml'
       - '.github/workflows/integration.yml'
       - 'tests/**'
 
